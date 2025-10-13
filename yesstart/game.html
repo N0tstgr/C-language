@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Gun Shooting Game</title>
+  <style>
+    * { margin: 0; padding: 0; }
+    canvas {
+      background: #222;
+      display: block;
+      margin: auto;
+    }
+  </style>
+</head>
+<body>
+<canvas id="gameCanvas" width="800" height="500"></canvas>
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+let player = { x: 400, y: 250, size: 20, speed: 4 };
+let bullets = [];
+let enemies = [];
+
+// Movement
+let keys = {};
+document.addEventListener('keydown', e => keys[e.key] = true);
+document.addEventListener('keyup', e => keys[e.key] = false);
+
+canvas.addEventListener('click', (e) => {
+  let rect = canvas.getBoundingClientRect();
+  let angle = Math.atan2(e.clientY - rect.top - player.y, e.clientX - rect.left - player.x);
+  bullets.push({ x: player.x, y: player.y, angle });
+});
+
+function spawnEnemy() {
+  let x = Math.random() * canvas.width;
+  let y = Math.random() * canvas.height;
+  enemies.push({ x, y, size: 20 });
+}
+
+function update() {
+  // Player Movement
+  if (keys['w']) player.y -= player.speed;
+  if (keys['s']) player.y += player.speed;
+  if (keys['a']) player.x -= player.speed;
+  if (keys['d']) player.x += player.speed;
+
+  // Update bullets
+  bullets.forEach((b, i) => {
+    b.x += Math.cos(b.angle) * 7;
+    b.y += Math.sin(b.angle) * 7;
+    if (b.x < 0 || b.x > canvas.width || b.y < 0 || b.y > canvas.height) bullets.splice(i, 1);
+  });
+
+  // Check collisions
+  enemies.forEach((enemy, ei) => {
+    bullets.forEach((b, bi) => {
+      let dx = enemy.x - b.x;
+      let dy = enemy.y - b.y;
+      if (Math.sqrt(dx * dx + dy * dy) < enemy.size) {
+        enemies.splice(ei, 1);
+        bullets.splice(bi, 1);
+      }
+    });
+  });
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // Draw player
+  ctx.fillStyle = 'cyan';
+  ctx.beginPath();
+  ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Draw bullets
+  ctx.fillStyle = 'yellow';
+  bullets.forEach(b => {
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, 5, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // Draw enemies
+  ctx.fillStyle = 'red';
+  enemies.forEach(e => {
+    ctx.beginPath();
+    ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2);
+    ctx.fill();
+  });
+}
+
+function gameLoop() {
+  update();
+  draw();
+  requestAnimationFrame(gameLoop);
+}
+
+setInterval(spawnEnemy, 2000);
+gameLoop();
+</script>
+</body>
+</html>
