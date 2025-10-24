@@ -4,7 +4,7 @@ int countOdd(int arr[], int n);
 void reverse(int arr[], int n);
 void printArr(int arr[], int n);
 int main(){
-int arr[] = {1, 2, 3, 4, 5,6,7};
+int arr[] = {1, 2, 3, 4, 5,6,7,8};
 reverse(arr, 5);
 printArr(arr, 5);
 return 0;
